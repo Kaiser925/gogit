@@ -20,11 +20,15 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"path/filepath"
 
 	"gopkg.in/ini.v1"
 
 	"github.com/Kaiser925/gogit/pkg/file"
 )
+
+// ErrNotGitRepo returned when current path is not in a git repository.
+var ErrNotGitRepo = errors.New("not a git repository")
 
 // Repository represents a git repository
 type Repository struct {
@@ -105,6 +109,27 @@ func (r *Repository) init() error {
 	}
 	r.conf = conf
 	return nil
+}
+
+// Find finds git repository root path.
+// If not a git repository, returns error
+func Find(name string) (string, error) {
+	abs, err := filepath.Abs(name)
+	if err != nil {
+		return "", err
+	}
+
+	f, err := os.Stat(filepath.Join(abs, ".git"))
+	if !os.IsNotExist(err) && f.IsDir() {
+		return abs, nil
+	}
+
+	parent := filepath.Dir(abs)
+	if parent == abs {
+		return "", ErrNotGitRepo
+	}
+
+	return Find(parent)
 }
 
 func defaultConf() []byte {
