@@ -17,19 +17,33 @@ package cmd
 
 import (
 	"fmt"
+	"os"
+	"path"
+	"path/filepath"
 
+	"github.com/Kaiser925/gogit/pkg/repository"
 	"github.com/spf13/cobra"
 )
+
+func init() {
+	rootCmd.AddCommand(initCmd)
+}
 
 // initCmd represents the init command
 var initCmd = &cobra.Command{
 	Use:   "init",
 	Short: " Create an empty Git repository or reinitialize an existing one",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("init called")
+		dir := "."
+		if len(args) > 0 {
+			dir = args[0]
+		}
+		_, err := repository.Create(dir)
+		if err != nil {
+			println(err.Error())
+			os.Exit(1)
+		}
+		name, _ := filepath.Abs(dir)
+		fmt.Println("Initialized Git repository in", path.Join(name, ".git/"))
 	},
-}
-
-func init() {
-	rootCmd.AddCommand(initCmd)
 }
