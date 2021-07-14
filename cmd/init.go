@@ -21,7 +21,7 @@ import (
 	"path"
 	"path/filepath"
 
-	"github.com/Kaiser925/gogit/pkg/repository"
+	"github.com/Kaiser925/gogit/internal/repository"
 	"github.com/spf13/cobra"
 )
 

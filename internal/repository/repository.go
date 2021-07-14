@@ -24,7 +24,7 @@ import (
 
 	"gopkg.in/ini.v1"
 
-	"github.com/Kaiser925/gogit/pkg/file"
+	"github.com/Kaiser925/gogit/internal/file"
 )
 
 // ErrNotGitRepo returned when current path is not in a git repository.
