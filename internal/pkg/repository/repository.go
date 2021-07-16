@@ -18,13 +18,12 @@ package repository
 import (
 	"errors"
 	"fmt"
+	file2 "github.com/Kaiser925/gogit/internal/pkg/file"
 	"os"
 	"path"
 	"path/filepath"
 
 	"gopkg.in/ini.v1"
-
-	"github.com/Kaiser925/gogit/internal/file"
 )
 
 // ErrNotGitRepo returned when current path is not in a git repository.
@@ -72,33 +71,33 @@ func Create(p string) (*Repository, error) {
 }
 
 func (r *Repository) init() error {
-	if err := file.MkdirOr(r.gitDir, "branches"); err != nil {
+	if err := file2.MkdirOr(r.gitDir, "branches"); err != nil {
 		return err
 	}
-	if err := file.MkdirOr(r.gitDir, "objects"); err != nil {
+	if err := file2.MkdirOr(r.gitDir, "objects"); err != nil {
 		return err
 	}
-	if err := file.MkdirOr(r.gitDir, "refs", "tags"); err != nil {
+	if err := file2.MkdirOr(r.gitDir, "refs", "tags"); err != nil {
 		return err
 	}
-	if err := file.MkdirOr(r.gitDir, "refs", "heads"); err != nil {
+	if err := file2.MkdirOr(r.gitDir, "refs", "heads"); err != nil {
 		return err
 	}
 
 	desc := []byte("Unnamed repository; edit this file 'description' to name the repository.\n")
-	err := file.WriteTo(path.Join(r.gitDir, "description"), desc)
+	err := file2.WriteTo(path.Join(r.gitDir, "description"), desc)
 	if err != nil {
 		return err
 	}
 
 	ref := []byte("ref: refs/heads/master\n")
-	err = file.WriteTo(path.Join(r.gitDir, "HEAD"), ref)
+	err = file2.WriteTo(path.Join(r.gitDir, "HEAD"), ref)
 	if err != nil {
 		return err
 	}
 
 	confName := path.Join(r.gitDir, "config")
-	err = file.WriteTo(confName, defaultConf())
+	err = file2.WriteTo(confName, defaultConf())
 	if err != nil {
 		return err
 	}

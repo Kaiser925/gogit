@@ -22,11 +22,11 @@ import (
 )
 
 func TestFind(t *testing.T) {
-	target, _ := filepath.Abs("./../..")
+	target, _ := filepath.Abs("./../../../")
 	path, err := Find(".")
 	assert.Empty(t, err)
 	assert.Equal(t, target, path)
 
-	_, err = Find("../../..")
+	_, err = Find("/")
 	assert.Equal(t, ErrNotGitRepo, err)
 }

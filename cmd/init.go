@@ -17,11 +17,11 @@ package cmd
 
 import (
 	"fmt"
+	repository2 "github.com/Kaiser925/gogit/internal/pkg/repository"
 	"os"
 	"path"
 	"path/filepath"
 
-	"github.com/Kaiser925/gogit/internal/repository"
 	"github.com/spf13/cobra"
 )
 
@@ -38,7 +38,7 @@ var initCmd = &cobra.Command{
 		if len(args) > 0 {
 			dir = args[0]
 		}
-		_, err := repository.Create(dir)
+		_, err := repository2.Create(dir)
 		if err != nil {
 			println(err.Error())
 			os.Exit(1)
