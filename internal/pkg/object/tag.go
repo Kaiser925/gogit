@@ -1,6 +1,6 @@
 /*
- * Developed by Kaiser925 on 2021/7/14.
- * Lasted modified 2021/7/14.
+ * Developed by Kaiser925 on 2021/7/16.
+ * Lasted modified 2021/7/16.
  * Copyright (c) 2021.  All rights reserved
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,21 +13,26 @@
  * limitations under the License.
  */
 
-package repository
+package object
 
-import (
-	"path/filepath"
-	"testing"
+type Tag struct {
+	p []byte
+}
 
-	"github.com/stretchr/testify/assert"
-)
+func NewTag() Object {
+	return &Tag{
+		nil,
+	}
+}
 
-func TestFind(t *testing.T) {
-	target, _ := filepath.Abs("./../../../")
-	path, err := Find(".")
-	assert.Empty(t, err)
-	assert.Equal(t, target, path)
+func (c *Tag) Format() []byte {
+	return []byte("tag")
+}
 
-	_, err = Find("/")
-	assert.Equal(t, ErrNotGitRepo, err)
+func (c *Tag) Serialize() ([]byte, error) {
+	panic("implement me")
+}
+
+func (c *Tag) Deserialize(bytes []byte) {
+	panic("implement me")
 }

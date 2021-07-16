@@ -18,10 +18,11 @@ package repository
 import (
 	"errors"
 	"fmt"
-	file2 "github.com/Kaiser925/gogit/internal/pkg/file"
 	"os"
 	"path"
 	"path/filepath"
+
+	file2 "github.com/Kaiser925/gogit/internal/pkg/file"
 
 	"gopkg.in/ini.v1"
 )

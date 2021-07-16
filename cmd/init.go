@@ -17,10 +17,11 @@ package cmd
 
 import (
 	"fmt"
-	repository2 "github.com/Kaiser925/gogit/internal/pkg/repository"
 	"os"
 	"path"
 	"path/filepath"
+
+	repository2 "github.com/Kaiser925/gogit/internal/pkg/repository"
 
 	"github.com/spf13/cobra"
 )
