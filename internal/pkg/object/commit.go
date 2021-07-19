@@ -19,10 +19,10 @@ type Commit struct {
 	p []byte
 }
 
-func NewCommit() Object {
-	return &Commit{
-		nil,
-	}
+func NewCommit(p []byte) Object {
+	c := &Commit{}
+	c.Deserialize(p)
+	return c
 }
 
 func (c *Commit) Format() []byte {

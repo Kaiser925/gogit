@@ -19,10 +19,10 @@ type Tag struct {
 	p []byte
 }
 
-func NewTag() Object {
-	return &Tag{
-		nil,
-	}
+func NewTag(p []byte) Object {
+	c := &Tag{}
+	c.Deserialize(p)
+	return c
 }
 
 func (c *Tag) Format() []byte {

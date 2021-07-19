@@ -19,10 +19,10 @@ type Tree struct {
 	p []byte
 }
 
-func NewTree() Object {
-	return &Tree{
-		nil,
-	}
+func NewTree(p []byte) Object {
+	t := &Tree{}
+	t.Deserialize(p)
+	return t
 }
 
 func (c *Tree) Format() []byte {

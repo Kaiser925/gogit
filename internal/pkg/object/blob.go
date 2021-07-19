@@ -20,10 +20,10 @@ type Blob struct {
 	p []byte
 }
 
-func NewBlob() Object {
-	return &Blob{
-		make([]byte, 40),
-	}
+func NewBlob(p []byte) Object {
+	blob := &Blob{}
+	blob.Deserialize(p)
+	return blob
 }
 
 func (b *Blob) Format() []byte {

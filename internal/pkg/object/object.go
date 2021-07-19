@@ -40,7 +40,7 @@ type Object interface {
 	Deserialize([]byte)
 }
 
-type ObjFunc func() Object
+type ObjFunc func([]byte) Object
 
 var _objMap = map[string]ObjFunc{
 	"blob":   NewBlob,
@@ -80,8 +80,7 @@ func Unmarshal(r io.Reader) (Object, error) {
 	if !ok {
 		return nil, errors.New(fmt.Sprintf("unknown type %s", t))
 	}
-	obj := objFunc()
-	obj.Deserialize(data[y:])
+	obj := objFunc(data[y:])
 	return obj, nil
 }
 

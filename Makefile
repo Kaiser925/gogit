@@ -1,5 +1,8 @@
 GO:=go
 
+.PHONY: all
+all: build
+
 ## build: Build code for host platform
 .PHONY: build
 build:
