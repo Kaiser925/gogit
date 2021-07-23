@@ -18,8 +18,6 @@ package object
 import (
 	"bytes"
 	"compress/zlib"
-	"crypto/sha1"
-	"encoding/hex"
 	"errors"
 	"fmt"
 	"io"
@@ -40,13 +38,19 @@ type Object interface {
 	Deserialize([]byte)
 }
 
-type ObjFunc func([]byte) Object
+type NewObjFunc func([]byte) Object
 
-var _objMap = map[string]ObjFunc{
+var _objMap = map[string]NewObjFunc{
 	"blob":   NewBlob,
 	"commit": NewCommit,
 	"tree":   NewTree,
 	"tag":    NewTag,
+}
+
+// IsValid checks t is valid object type or not.
+func IsValid(t string) bool {
+	_, ok := _objMap[t]
+	return ok
 }
 
 // Unmarshal reads from r, parses data to Object.
@@ -84,8 +88,8 @@ func Unmarshal(r io.Reader) (Object, error) {
 	return obj, nil
 }
 
-// ReadFile reads Object from file.
-func ReadFile(name string) (Object, error) {
+// Load loads Object from object file.
+func Load(name string) (Object, error) {
 	f, err := os.Open(name)
 	if err != nil {
 		return nil, err
@@ -94,36 +98,47 @@ func ReadFile(name string) (Object, error) {
 	return Unmarshal(f)
 }
 
-// MarshalTo encodes Object to data, writes it to w.
-func MarshalTo(obj Object, w io.Writer) error {
+// Marshal encodes Object to data.
+func Marshal(obj Object) ([]byte, error) {
 	p, err := obj.Serialize()
 	if err != nil {
-		return err
+		return nil, err
 	}
-	size := strconv.Itoa(len(p))
-	h := sha1.New()
-	h.Write(obj.Format())
-	h.Write([]byte{32})
-	h.Write([]byte(size))
-	h.Write([]byte{0x00})
-	h.Write(p)
-	res := h.Sum(nil)
+	buf := bytes.NewBuffer([]byte{})
 
-	hw := hex.NewEncoder(w)
-	_, err = hw.Write(res)
-	if err != nil {
-		return err
-	}
-	return nil
+	size := strconv.Itoa(len(p))
+	buf.Write(obj.Format())
+	buf.Write([]byte{space})
+	buf.Write([]byte(size))
+	buf.Write([]byte{nul})
+	buf.Write(p)
+	return buf.Bytes(), nil
 }
 
-// WriteTo decodes Object and write it to file,
-func WriteTo(obj Object, name string) error {
-	f, err := os.Create(name)
+// Hash reads a file, computes its hash as an object.
+func Hash(name string, t string) ([]byte, error) {
+	f, err := os.Open(name)
 	if err != nil {
-		return err
+		return nil, err
+	}
+	defer f.Close()
+
+	p, err := io.ReadAll(f)
+	if err != nil {
+		return nil, err
 	}
 
-	defer f.Close()
-	return MarshalTo(obj, f)
+	newObj, ok := _objMap[t]
+	if !ok {
+		return nil, errors.New(fmt.Sprintf("unknown type %s", t))
+	}
+
+	obj := newObj(p)
+
+	data, err := Marshal(obj)
+	if err != nil {
+		return nil, err
+	}
+
+	return data, nil
 }
