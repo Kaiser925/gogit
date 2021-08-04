@@ -18,6 +18,8 @@ package object
 import (
 	"bytes"
 	"compress/zlib"
+	"crypto/sha1"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"io"
@@ -53,7 +55,7 @@ func IsValid(t string) bool {
 	return ok
 }
 
-// Unmarshal reads from r, parses data to Object.
+// Unmarshal reads data from reader of object database, parses data to Object.
 func Unmarshal(r io.Reader) (Object, error) {
 	rc, err := zlib.NewReader(r)
 	if err != nil {
@@ -98,7 +100,7 @@ func Load(name string) (Object, error) {
 	return Unmarshal(f)
 }
 
-// Marshal encodes Object to data.
+// Marshal encodes Object to bytes.
 func Marshal(obj Object) ([]byte, error) {
 	p, err := obj.Serialize()
 	if err != nil {
@@ -115,8 +117,8 @@ func Marshal(obj Object) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-// Hash reads a file, computes its hash as an object.
-func Hash(name string, t string) ([]byte, error) {
+// FromFile computes file, returns the object.
+func FromFile(name string, t string) (Object, error) {
 	f, err := os.Open(name)
 	if err != nil {
 		return nil, err
@@ -134,11 +136,20 @@ func Hash(name string, t string) ([]byte, error) {
 	}
 
 	obj := newObj(p)
+	return obj, nil
+}
 
+// ShaSum generates the SHA value of object, encodes sum to hex string.
+func ShaSum(obj Object) (string, error) {
+	hasher := sha1.New()
 	data, err := Marshal(obj)
 	if err != nil {
-		return nil, err
+		return "", err
+	}
+	_, err = hasher.Write(data)
+	if err != nil {
+		return "", err
 	}
 
-	return data, nil
+	return hex.EncodeToString(hasher.Sum(nil)), nil
 }

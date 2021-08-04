@@ -33,7 +33,7 @@ func init() {
 // initCmd represents the init command
 var initCmd = &cobra.Command{
 	Use:   "init",
-	Short: " Create an empty Git repository or reinitialize an existing one",
+	Short: "Create an empty Git repository or reinitialize an existing one",
 	Run: func(cmd *cobra.Command, args []string) {
 		dir := "."
 		if len(args) > 0 {

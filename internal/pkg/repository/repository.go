@@ -22,7 +22,9 @@ import (
 	"path"
 	"path/filepath"
 
-	file2 "github.com/Kaiser925/gogit/internal/pkg/file"
+	"github.com/Kaiser925/gogit/internal/pkg/repository/object"
+
+	"github.com/Kaiser925/gogit/internal/pkg/file"
 
 	"gopkg.in/ini.v1"
 )
@@ -59,6 +61,34 @@ func New(p string) (*Repository, error) {
 	return &r, nil
 }
 
+// WriteObject writes object to repository object database
+func (r *Repository) WriteObject(obj object.Object) error {
+	data, err := object.Marshal(obj)
+	if err != nil {
+		return err
+	}
+
+	sha, err := object.ShaSum(obj)
+	if err != nil {
+		return err
+	}
+	if err := file.MkdirOr(r.gitDir, sha[:2]); err != nil {
+		return err
+	}
+
+	f, err := os.Create(filepath.Join(r.gitDir, sha[:2], sha[2:]))
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	if _, err := f.Write(data); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // Create creates a new git repository and inits the git repo.
 func Create(p string) (*Repository, error) {
 	var r Repository
@@ -72,33 +102,33 @@ func Create(p string) (*Repository, error) {
 }
 
 func (r *Repository) init() error {
-	if err := file2.MkdirOr(r.gitDir, "branches"); err != nil {
+	if err := file.MkdirOr(r.gitDir, "branches"); err != nil {
 		return err
 	}
-	if err := file2.MkdirOr(r.gitDir, "objects"); err != nil {
+	if err := file.MkdirOr(r.gitDir, "objects"); err != nil {
 		return err
 	}
-	if err := file2.MkdirOr(r.gitDir, "refs", "tags"); err != nil {
+	if err := file.MkdirOr(r.gitDir, "refs", "tags"); err != nil {
 		return err
 	}
-	if err := file2.MkdirOr(r.gitDir, "refs", "heads"); err != nil {
+	if err := file.MkdirOr(r.gitDir, "refs", "heads"); err != nil {
 		return err
 	}
 
 	desc := []byte("Unnamed repository; edit this file 'description' to name the repository.\n")
-	err := file2.WriteTo(path.Join(r.gitDir, "description"), desc)
+	err := file.WriteTo(path.Join(r.gitDir, "description"), desc)
 	if err != nil {
 		return err
 	}
 
 	ref := []byte("ref: refs/heads/master\n")
-	err = file2.WriteTo(path.Join(r.gitDir, "HEAD"), ref)
+	err = file.WriteTo(path.Join(r.gitDir, "HEAD"), ref)
 	if err != nil {
 		return err
 	}
 
 	confName := path.Join(r.gitDir, "config")
-	err = file2.WriteTo(confName, defaultConf())
+	err = file.WriteTo(confName, defaultConf())
 	if err != nil {
 		return err
 	}

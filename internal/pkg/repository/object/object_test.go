@@ -48,3 +48,11 @@ func TestIsValid(t *testing.T) {
 		assert.Equal(t, tt.ok, IsValid(tt.t))
 	}
 }
+
+func TestShaSum(t *testing.T) {
+	obj, err := FromFile("../../../../LICENSE", "blob")
+	assert.Nil(t, err)
+	sha, err := ShaSum(obj)
+	assert.Nil(t, err)
+	assert.Equal(t, "d645695673349e3947e8e5ae42332d0ac3164cd7", sha)
+}
