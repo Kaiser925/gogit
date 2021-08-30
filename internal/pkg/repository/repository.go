@@ -35,7 +35,8 @@ var ErrNotGitRepo = errors.New("not a git repository")
 type Repository struct {
 	workTree string
 	gitDir   string
-	conf     *ini.File
+
+	conf *ini.File
 }
 
 // New returns a Repository instance.
@@ -88,56 +89,46 @@ func (r *Repository) WriteObject(obj object.Object) error {
 	return nil
 }
 
-// Create creates a new git repository and inits the git repo.
-func Create(p string) (*Repository, error) {
+// Init inits a new git repository.
+func Init(p string) (*Repository, error) {
 	var r Repository
 	r.workTree = p
 	r.gitDir = path.Join(p, ".git")
-	err := r.init()
-	if err != nil {
-		return nil, err
-	}
-	return &r, nil
-}
-
-func (r *Repository) init() error {
-	if err := file.MkdirOr(r.gitDir, "branches"); err != nil {
-		return err
-	}
-	if err := file.MkdirOr(r.gitDir, "objects"); err != nil {
-		return err
-	}
-	if err := file.MkdirOr(r.gitDir, "refs", "tags"); err != nil {
-		return err
-	}
-	if err := file.MkdirOr(r.gitDir, "refs", "heads"); err != nil {
-		return err
+	dirs := []string{"branches", "objects", "refs/tags", "refs/heads"}
+	for _, d := range dirs {
+		err := file.MkdirOr(r.gitDir, d)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	desc := []byte("Unnamed repository; edit this file 'description' to name the repository.\n")
 	err := file.WriteTo(path.Join(r.gitDir, "description"), desc)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	ref := []byte("ref: refs/heads/master\n")
 	err = file.WriteTo(path.Join(r.gitDir, "HEAD"), ref)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	confName := path.Join(r.gitDir, "config")
 	err = file.WriteTo(confName, defaultConf())
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	conf, err := ini.Load(confName)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	r.conf = conf
-	return nil
+	if err != nil {
+		return nil, err
+	}
+	return &r, nil
 }
 
 // Find finds git repository root path.

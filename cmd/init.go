@@ -21,7 +21,7 @@ import (
 	"path"
 	"path/filepath"
 
-	repository2 "github.com/Kaiser925/gogit/internal/pkg/repository"
+	"github.com/Kaiser925/gogit/internal/pkg/repository"
 
 	"github.com/spf13/cobra"
 )
@@ -33,13 +33,13 @@ func init() {
 // initCmd represents the init command
 var initCmd = &cobra.Command{
 	Use:   "init",
-	Short: "Create an empty Git repository or reinitialize an existing one",
+	Short: "Init an empty Git repository or reinitialize an existing one",
 	Run: func(cmd *cobra.Command, args []string) {
 		dir := "."
 		if len(args) > 0 {
 			dir = args[0]
 		}
-		_, err := repository2.Create(dir)
+		_, err := repository.Init(dir)
 		if err != nil {
 			println(err.Error())
 			os.Exit(1)
