@@ -50,7 +50,7 @@ func TestIsValid(t *testing.T) {
 }
 
 func TestShaSum(t *testing.T) {
-	obj, err := FromFile("../../../../LICENSE", "blob")
+	obj, err := FromFile("../../../LICENSE", "blob")
 	assert.Nil(t, err)
 	sha, err := ShaSum(obj)
 	assert.Nil(t, err)

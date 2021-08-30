@@ -18,11 +18,10 @@ package repository
 import (
 	"errors"
 	"fmt"
+	"github.com/Kaiser925/gogit/internal/pkg/object"
 	"os"
 	"path"
 	"path/filepath"
-
-	"github.com/Kaiser925/gogit/internal/pkg/repository/object"
 
 	"github.com/Kaiser925/gogit/internal/pkg/file"
 
