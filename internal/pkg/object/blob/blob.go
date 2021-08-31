@@ -1,6 +1,6 @@
 /*
- * Developed by Kaiser925 on 2021/7/16.
- * Lasted modified 2021/7/16.
+ * Developed by Kaiser925 on 2021/8/31.
+ * Lasted modified 2021/8/4.
  * Copyright (c) 2021.  All rights reserved
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,26 +13,29 @@
  * limitations under the License.
  */
 
-package object
+package blob
 
-type Commit struct {
+import "github.com/Kaiser925/gogit/internal/pkg/object"
+
+// Blob represents a git blob
+type Blob struct {
 	p []byte
 }
 
-func NewCommit(p []byte) Object {
-	c := &Commit{}
-	c.Deserialize(p)
-	return c
+func New(p []byte) object.Object {
+	blob := &Blob{}
+	blob.Deserialize(p)
+	return blob
 }
 
-func (c *Commit) Format() []byte {
-	return []byte("commit")
+func (b *Blob) Format() []byte {
+	return []byte("blob")
 }
 
-func (c *Commit) Serialize() ([]byte, error) {
-	panic("implement me")
+func (b *Blob) Serialize() ([]byte, error) {
+	return b.p, nil
 }
 
-func (c *Commit) Deserialize(bytes []byte) {
-	panic("implement me")
+func (b *Blob) Deserialize(p []byte) {
+	b.p = p
 }

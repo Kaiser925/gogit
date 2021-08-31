@@ -18,30 +18,27 @@ package repository
 import (
 	"errors"
 	"fmt"
-	"github.com/Kaiser925/gogit/internal/pkg/object"
 	"os"
 	"path"
 	"path/filepath"
+
+	"github.com/Kaiser925/gogit/internal/pkg/object"
 
 	"github.com/Kaiser925/gogit/internal/pkg/file"
 
 	"gopkg.in/ini.v1"
 )
 
-// ErrNotGitRepo returned when current path is not in a git repository.
-var ErrNotGitRepo = errors.New("not a git repository")
-
-// Repository represents a git repository
-type Repository struct {
+type repository struct {
 	workTree string
 	gitDir   string
 
 	conf *ini.File
 }
 
-// New returns a Repository instance.
-func New(p string) (*Repository, error) {
-	var r Repository
+// New returns a repository instance.
+func New(p string) (*repository, error) {
+	var r repository
 	r.workTree = p
 	r.gitDir = path.Join(p, ".git")
 
@@ -62,7 +59,7 @@ func New(p string) (*Repository, error) {
 }
 
 // WriteObject writes object to repository object database
-func (r *Repository) WriteObject(obj object.Object) error {
+func (r *repository) WriteObject(obj object.Object) error {
 	data, err := object.Marshal(obj)
 	if err != nil {
 		return err
@@ -90,8 +87,8 @@ func (r *Repository) WriteObject(obj object.Object) error {
 }
 
 // Init inits a new git repository.
-func Init(p string) (*Repository, error) {
-	var r Repository
+func Init(p string) (*repository, error) {
+	var r repository
 	r.workTree = p
 	r.gitDir = path.Join(p, ".git")
 	dirs := []string{"branches", "objects", "refs/tags", "refs/heads"}
@@ -129,27 +126,6 @@ func Init(p string) (*Repository, error) {
 		return nil, err
 	}
 	return &r, nil
-}
-
-// Find finds git repository root path.
-// If not a git repository, returns error
-func Find(name string) (string, error) {
-	abs, err := filepath.Abs(name)
-	if err != nil {
-		return "", err
-	}
-
-	f, err := os.Stat(filepath.Join(abs, ".git"))
-	if !os.IsNotExist(err) && f.IsDir() {
-		return abs, nil
-	}
-
-	parent := filepath.Dir(abs)
-	if parent == abs {
-		return "", ErrNotGitRepo
-	}
-
-	return Find(parent)
 }
 
 func defaultConf() []byte {

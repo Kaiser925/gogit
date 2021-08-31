@@ -1,6 +1,6 @@
 /*
- * Developed by Kaiser925 on 2021/7/16.
- * Lasted modified 2021/7/16.
+ * Developed by Kaiser925 on 2021/8/31.
+ * Lasted modified 2021/8/4.
  * Copyright (c) 2021.  All rights reserved
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,26 +13,28 @@
  * limitations under the License.
  */
 
-package object
+package commit
 
-type Tag struct {
+import "github.com/Kaiser925/gogit/internal/pkg/object"
+
+type Commit struct {
 	p []byte
 }
 
-func NewTag(p []byte) Object {
-	c := &Tag{}
+func New(p []byte) object.Object {
+	c := &Commit{}
 	c.Deserialize(p)
 	return c
 }
 
-func (c *Tag) Format() []byte {
-	return []byte("tag")
+func (c *Commit) Format() []byte {
+	return []byte("commit")
 }
 
-func (c *Tag) Serialize() ([]byte, error) {
+func (c *Commit) Serialize() ([]byte, error) {
 	panic("implement me")
 }
 
-func (c *Tag) Deserialize(bytes []byte) {
+func (c *Commit) Deserialize(bytes []byte) {
 	panic("implement me")
 }

@@ -26,6 +26,11 @@ import (
 	"io/ioutil"
 	"os"
 	"strconv"
+
+	"github.com/Kaiser925/gogit/internal/pkg/object/blob"
+	"github.com/Kaiser925/gogit/internal/pkg/object/commit"
+	"github.com/Kaiser925/gogit/internal/pkg/object/tag"
+	"github.com/Kaiser925/gogit/internal/pkg/object/tree"
 )
 
 const (
@@ -43,10 +48,10 @@ type Object interface {
 type NewObjFunc func([]byte) Object
 
 var _objMap = map[string]NewObjFunc{
-	"blob":   NewBlob,
-	"commit": NewCommit,
-	"tree":   NewTree,
-	"tag":    NewTag,
+	"blob":   blob.New,
+	"commit": commit.New,
+	"tree":   tree.New,
+	"tag":    tag.New,
 }
 
 // IsValid checks t is valid object type or not.

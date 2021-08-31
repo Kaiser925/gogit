@@ -17,8 +17,9 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/Kaiser925/gogit/internal/pkg/object"
 	"os"
+
+	"github.com/Kaiser925/gogit/internal/pkg/object"
 
 	"github.com/Kaiser925/gogit/internal/pkg/repository"
 	"github.com/spf13/cobra"

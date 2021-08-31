@@ -16,9 +16,11 @@
 package file
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path"
+	"path/filepath"
 )
 
 type NotDirError struct {
@@ -30,6 +32,8 @@ func NewNotDirError(name string) *NotDirError {
 		fmt.Sprintf("%s is not a dir", name),
 	}
 }
+
+var ErrNotFound = errors.New("path not found")
 
 func (e *NotDirError) Error() string {
 	return e.message
@@ -76,4 +80,26 @@ func MkdirOr(elem ...string) error {
 		return NewNotDirError(name)
 	}
 	return nil
+}
+
+// Find look for a path starting at current directory
+// and recurring back until "/".
+// If not found, it will ErrNotFound
+func Find(dir string, name string) (string, error) {
+	abs, err := filepath.Abs(dir)
+	if err != nil {
+		return "", err
+	}
+
+	f, err := os.Stat(filepath.Join(abs, name))
+	if !os.IsNotExist(err) && f.IsDir() {
+		return abs, nil
+	}
+
+	parent := filepath.Dir(abs)
+	if parent == abs {
+		return "", ErrNotFound
+	}
+
+	return Find(parent, name)
 }

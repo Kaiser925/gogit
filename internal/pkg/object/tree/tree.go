@@ -1,6 +1,6 @@
 /*
- * Developed by Kaiser925 on 2021/7/16.
- * Lasted modified 2021/7/16.
+ * Developed by Kaiser925 on 2021/8/31.
+ * Lasted modified 2021/8/4.
  * Copyright (c) 2021.  All rights reserved
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,27 +13,28 @@
  * limitations under the License.
  */
 
-package object
+package tree
 
-// Blob represents a git blob
-type Blob struct {
+import "github.com/Kaiser925/gogit/internal/pkg/object"
+
+type Tree struct {
 	p []byte
 }
 
-func NewBlob(p []byte) Object {
-	blob := &Blob{}
-	blob.Deserialize(p)
-	return blob
+func New(p []byte) object.Object {
+	t := &Tree{}
+	t.Deserialize(p)
+	return t
 }
 
-func (b *Blob) Format() []byte {
-	return []byte("blob")
+func (c *Tree) Format() []byte {
+	return []byte("tree")
 }
 
-func (b *Blob) Serialize() ([]byte, error) {
-	return b.p, nil
+func (c *Tree) Serialize() ([]byte, error) {
+	panic("implement me")
 }
 
-func (b *Blob) Deserialize(p []byte) {
-	b.p = p
+func (c *Tree) Deserialize(bytes []byte) {
+	panic("implement me")
 }
