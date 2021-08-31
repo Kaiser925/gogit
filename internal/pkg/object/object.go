@@ -19,9 +19,9 @@ import (
 	"bytes"
 	"compress/zlib"
 	"crypto/sha1"
+	"encoding"
 	"encoding/hex"
 	"errors"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
@@ -41,23 +41,29 @@ const (
 // Object is a git object
 type Object interface {
 	Format() []byte
-	Serialize() ([]byte, error)
-	Deserialize([]byte)
+	encoding.BinaryMarshaler
+	encoding.BinaryUnmarshaler
 }
 
-type NewObjFunc func([]byte) Object
-
-var _objMap = map[string]NewObjFunc{
-	"blob":   blob.New,
-	"commit": commit.New,
-	"tree":   tree.New,
-	"tag":    tag.New,
-}
-
-// IsValid checks t is valid object type or not.
-func IsValid(t string) bool {
-	_, ok := _objMap[t]
-	return ok
+func New(t string, p []byte) (Object, error) {
+	var obj interface{}
+	var err error
+	switch t {
+	case "blob":
+		obj, err = blob.New(p)
+	case "commit":
+		obj, err = commit.New(p)
+	case "tree":
+		obj, err = tree.New(p)
+	case "tag":
+		obj, err = tag.New(p)
+	default:
+		err = errors.New("not valid object type: " + t)
+	}
+	if err != nil {
+		return nil, err
+	}
+	return obj.(Object), nil
 }
 
 // Unmarshal reads data from reader of object database, parses data to Object.
@@ -87,11 +93,10 @@ func Unmarshal(r io.Reader) (Object, error) {
 		return nil, errors.New("bad length for sha")
 	}
 
-	objFunc, ok := _objMap[t]
-	if !ok {
-		return nil, errors.New(fmt.Sprintf("unknown type %s", t))
+	obj, err := New(t, data[y:])
+	if err != nil {
+		return nil, err
 	}
-	obj := objFunc(data[y:])
 	return obj, nil
 }
 
@@ -107,7 +112,7 @@ func Load(name string) (Object, error) {
 
 // Marshal encodes Object to bytes.
 func Marshal(obj Object) ([]byte, error) {
-	p, err := obj.Serialize()
+	p, err := obj.MarshalBinary()
 	if err != nil {
 		return nil, err
 	}
@@ -135,12 +140,10 @@ func FromFile(name string, t string) (Object, error) {
 		return nil, err
 	}
 
-	newObj, ok := _objMap[t]
-	if !ok {
-		return nil, errors.New(fmt.Sprintf("unknown type %s", t))
+	obj, err := New(t, p)
+	if err != nil {
+		return nil, err
 	}
-
-	obj := newObj(p)
 	return obj, nil
 }
 

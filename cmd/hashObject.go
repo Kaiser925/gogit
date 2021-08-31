@@ -45,11 +45,6 @@ func init() {
 }
 
 func run(_ *cobra.Command, args []string) {
-	if !object.IsValid(objType) {
-		println("not valid type:", objType)
-		os.Exit(1)
-	}
-
 	if len(args) == 0 {
 		return
 	}

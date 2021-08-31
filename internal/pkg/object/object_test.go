@@ -21,34 +21,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestIsValid(t *testing.T) {
-	var tests = []struct {
-		t  string
-		ok bool
-	}{
-		{
-			"blob",
-			true,
-		},
-		{
-			"commit",
-			true,
-		},
-		{
-			"commmmmmmmit",
-			false,
-		},
-		{
-			"",
-			false,
-		},
-	}
-
-	for _, tt := range tests {
-		assert.Equal(t, tt.ok, IsValid(tt.t))
-	}
-}
-
 func TestShaSum(t *testing.T) {
 	obj, err := FromFile("../../../LICENSE", "blob")
 	assert.Nil(t, err)

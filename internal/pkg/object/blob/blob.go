@@ -15,27 +15,29 @@
 
 package blob
 
-import "github.com/Kaiser925/gogit/internal/pkg/object"
-
 // Blob represents a git blob
 type Blob struct {
 	p []byte
 }
 
-func New(p []byte) object.Object {
+func New(p []byte) (*Blob, error) {
 	blob := &Blob{}
-	blob.Deserialize(p)
-	return blob
+	err := blob.UnmarshalBinary(p)
+	if err != nil {
+		return nil, err
+	}
+	return blob, nil
 }
 
 func (b *Blob) Format() []byte {
 	return []byte("blob")
 }
 
-func (b *Blob) Serialize() ([]byte, error) {
+func (b *Blob) MarshalBinary() ([]byte, error) {
 	return b.p, nil
 }
 
-func (b *Blob) Deserialize(p []byte) {
+func (b *Blob) UnmarshalBinary(p []byte) error {
 	b.p = p
+	return nil
 }

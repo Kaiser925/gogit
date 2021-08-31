@@ -15,26 +15,27 @@
 
 package tree
 
-import "github.com/Kaiser925/gogit/internal/pkg/object"
-
 type Tree struct {
 	p []byte
 }
 
-func New(p []byte) object.Object {
+func New(p []byte) (*Tree, error) {
 	t := &Tree{}
-	t.Deserialize(p)
-	return t
+	err := t.UnmarshalBinary(p)
+	if err != nil {
+		return nil, err
+	}
+	return t, nil
 }
 
 func (c *Tree) Format() []byte {
 	return []byte("tree")
 }
 
-func (c *Tree) Serialize() ([]byte, error) {
+func (c *Tree) MarshalBinary() ([]byte, error) {
 	panic("implement me")
 }
 
-func (c *Tree) Deserialize(bytes []byte) {
+func (c *Tree) UnmarshalBinary(bytes []byte) error {
 	panic("implement me")
 }

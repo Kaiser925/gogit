@@ -15,26 +15,27 @@
 
 package commit
 
-import "github.com/Kaiser925/gogit/internal/pkg/object"
-
 type Commit struct {
 	p []byte
 }
 
-func New(p []byte) object.Object {
+func New(p []byte) (*Commit, error) {
 	c := &Commit{}
-	c.Deserialize(p)
-	return c
+	err := c.UnmarshalBinary(p)
+	if err != nil {
+		return nil, err
+	}
+	return c, nil
 }
 
 func (c *Commit) Format() []byte {
 	return []byte("commit")
 }
 
-func (c *Commit) Serialize() ([]byte, error) {
+func (c *Commit) MarshalBinary() ([]byte, error) {
 	panic("implement me")
 }
 
-func (c *Commit) Deserialize(bytes []byte) {
+func (c *Commit) UnmarshalBinary(bytes []byte) error {
 	panic("implement me")
 }

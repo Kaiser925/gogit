@@ -15,26 +15,28 @@
 
 package tag
 
-import "github.com/Kaiser925/gogit/internal/pkg/object"
-
 type Tag struct {
 	p []byte
 }
 
-func New(p []byte) object.Object {
+func New(p []byte) (*Tag, error) {
 	c := &Tag{}
-	c.Deserialize(p)
-	return c
+	err := c.UnmarshalBinary(p)
+	if err != nil {
+		return nil, err
+	}
+
+	return c, nil
 }
 
 func (c *Tag) Format() []byte {
 	return []byte("tag")
 }
 
-func (c *Tag) Serialize() ([]byte, error) {
+func (c *Tag) MarshalBinary() ([]byte, error) {
 	panic("implement me")
 }
 
-func (c *Tag) Deserialize(bytes []byte) {
+func (c *Tag) UnmarshalBinary(bytes []byte) error {
 	panic("implement me")
 }
