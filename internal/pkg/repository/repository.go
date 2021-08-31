@@ -22,6 +22,8 @@ import (
 	"path"
 	"path/filepath"
 
+	"github.com/Kaiser925/gogit/internal/pkg/bytesutil"
+
 	"github.com/Kaiser925/gogit/internal/pkg/object"
 
 	"github.com/Kaiser925/gogit/internal/pkg/file"
@@ -65,7 +67,7 @@ func (r *repository) WriteObject(obj object.Object) error {
 		return err
 	}
 
-	sha, err := object.ShaSum(obj)
+	sha, err := bytesutil.HexSha1(data)
 	if err != nil {
 		return err
 	}

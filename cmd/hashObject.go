@@ -19,6 +19,8 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/Kaiser925/gogit/internal/pkg/bytesutil"
+
 	"github.com/Kaiser925/gogit/internal/pkg/object"
 
 	"github.com/Kaiser925/gogit/internal/pkg/repository"
@@ -51,14 +53,19 @@ func run(_ *cobra.Command, args []string) {
 
 	obj, err := object.FromFile(args[0], objType)
 	if err != nil {
-		println(err.Error())
+		fmt.Println(err.Error())
 		os.Exit(1)
 	}
 
 	if !needWrite {
-		sha, err := object.ShaSum(obj)
+		p, err := obj.MarshalBinary()
 		if err != nil {
-			println(err.Error())
+			fmt.Println(err.Error())
+			os.Exit(1)
+		}
+		sha, err := bytesutil.HexSha1(p)
+		if err != nil {
+			fmt.Println(err.Error())
 			os.Exit(1)
 		}
 		fmt.Println(sha)
@@ -67,13 +74,13 @@ func run(_ *cobra.Command, args []string) {
 
 	repo, err := repository.New(".")
 	if err != nil {
-		println(err.Error())
+		fmt.Println(err.Error())
 		os.Exit(1)
 	}
 
 	err = repo.WriteObject(obj)
 	if err != nil {
-		println(err.Error())
+		fmt.Println(err.Error())
 		os.Exit(1)
 	}
 }

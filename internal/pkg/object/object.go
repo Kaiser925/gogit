@@ -18,9 +18,7 @@ package object
 import (
 	"bytes"
 	"compress/zlib"
-	"crypto/sha1"
 	"encoding"
-	"encoding/hex"
 	"errors"
 	"io"
 	"io/ioutil"
@@ -145,19 +143,4 @@ func FromFile(name string, t string) (Object, error) {
 		return nil, err
 	}
 	return obj, nil
-}
-
-// ShaSum generates the SHA value of object, encodes sum to hex string.
-func ShaSum(obj Object) (string, error) {
-	hasher := sha1.New()
-	data, err := Marshal(obj)
-	if err != nil {
-		return "", err
-	}
-	_, err = hasher.Write(data)
-	if err != nil {
-		return "", err
-	}
-
-	return hex.EncodeToString(hasher.Sum(nil)), nil
 }

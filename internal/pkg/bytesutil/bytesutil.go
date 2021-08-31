@@ -1,6 +1,6 @@
 /*
- * Developed by Kaiser925 on 2021/7/19.
- * Lasted modified 2021/7/19.
+ * Developed by Kaiser925 on 2021/8/31.
+ * Lasted modified 2021/8/31.
  * Copyright (c) 2021.  All rights reserved
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,18 +13,20 @@
  * limitations under the License.
  */
 
-package object
+package bytesutil
 
 import (
-	"testing"
-
-	"github.com/stretchr/testify/assert"
+	"crypto/sha1"
+	"encoding/hex"
 )
 
-func TestShaSum(t *testing.T) {
-	obj, err := FromFile("../../../LICENSE", "blob")
-	assert.Nil(t, err)
-	sha, err := ShaSum(obj)
-	assert.Nil(t, err)
-	assert.Equal(t, "d645695673349e3947e8e5ae42332d0ac3164cd7", sha)
+// HexSha1 calculates the SHA1 sum of data,
+// and returns the hexadecimal encoding of sum
+func HexSha1(p []byte) (string, error) {
+	sh := sha1.New()
+	_, err := sh.Write(p)
+	if err != nil {
+		return "", err
+	}
+	return hex.EncodeToString(sh.Sum(nil)), nil
 }
