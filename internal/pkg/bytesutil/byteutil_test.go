@@ -16,8 +16,9 @@
 package bytesutil
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestHexSha1(t *testing.T) {

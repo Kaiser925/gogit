@@ -17,8 +17,9 @@ package output
 
 import (
 	"fmt"
-	"github.com/Kaiser925/gogit/internal/pkg/bytesutil"
 	"os"
+
+	"github.com/Kaiser925/gogit/internal/pkg/bytesutil"
 )
 
 // Fatal writes data to standard output.
