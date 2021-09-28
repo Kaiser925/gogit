@@ -41,3 +41,13 @@ func TestHexSha1(t *testing.T) {
 		assert.Equal(t, tt.want, got)
 	}
 }
+
+func TestZlibCompressAndDecompress(t *testing.T) {
+	txt := []byte("hello, zlib")
+	p, err := ZlibCompress(txt)
+	assert.Nil(t, err)
+
+	b, err := ZlibDecompress(p)
+	assert.Nil(t, err)
+	assert.Equal(t, txt, b)
+}

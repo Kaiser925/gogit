@@ -16,8 +16,11 @@
 package bytesutil
 
 import (
+	"bytes"
+	"compress/zlib"
 	"crypto/sha1"
 	"encoding/hex"
+	"io"
 )
 
 // HexSha1 calculates the SHA1 sum of data,
@@ -29,4 +32,33 @@ func HexSha1(p []byte) (string, error) {
 		return "", err
 	}
 	return hex.EncodeToString(sh.Sum(nil)), nil
+}
+
+// ZlibCompress compresses p with zlib.
+func ZlibCompress(p []byte) ([]byte, error) {
+	var buf bytes.Buffer
+	w := zlib.NewWriter(&buf)
+	_, err := w.Write(p)
+	if err != nil {
+		return nil, err
+	}
+	err = w.Close()
+	if err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
+}
+
+// ZlibDecompress decompresses the data.
+func ZlibDecompress(p []byte) ([]byte, error) {
+	buf := bytes.NewReader(p)
+	r, err := zlib.NewReader(buf)
+	if err != nil {
+		return nil, err
+	}
+	b, err := io.ReadAll(r)
+	if err != nil {
+		return nil, err
+	}
+	return b, nil
 }
