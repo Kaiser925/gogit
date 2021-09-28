@@ -1,6 +1,6 @@
 /*
- * Developed by Kaiser925 on 2021/8/31.
- * Lasted modified 2021/8/4.
+ * Developed by Kaiser925 on 2021/9/28.
+ * Lasted modified 2021/8/31.
  * Copyright (c) 2021.  All rights reserved
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,30 +13,29 @@
  * limitations under the License.
  */
 
-package tag
+package object
 
-type Tag struct {
+type Commit struct {
 	p []byte
 }
 
-func New(p []byte) (*Tag, error) {
-	c := &Tag{}
+func NewCommit(p []byte) (*Commit, error) {
+	c := &Commit{}
 	err := c.UnmarshalBinary(p)
 	if err != nil {
 		return nil, err
 	}
-
 	return c, nil
 }
 
-func (c *Tag) Format() []byte {
-	return []byte("tag")
+func (c *Commit) Format() []byte {
+	return []byte("commit")
 }
 
-func (c *Tag) MarshalBinary() ([]byte, error) {
+func (c *Commit) MarshalBinary() ([]byte, error) {
 	panic("implement me")
 }
 
-func (c *Tag) UnmarshalBinary(bytes []byte) error {
+func (c *Commit) UnmarshalBinary(bytes []byte) error {
 	panic("implement me")
 }

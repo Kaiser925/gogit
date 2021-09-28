@@ -1,6 +1,6 @@
 /*
- * Developed by Kaiser925 on 2021/8/31.
- * Lasted modified 2021/8/4.
+ * Developed by Kaiser925 on 2021/9/28.
+ * Lasted modified 2021/8/31.
  * Copyright (c) 2021.  All rights reserved
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
-package tree
+package object
 
 type Tree struct {
 	p []byte
 }
 
-func New(p []byte) (*Tree, error) {
+func NewTree(p []byte) (*Tree, error) {
 	t := &Tree{}
 	err := t.UnmarshalBinary(p)
 	if err != nil {

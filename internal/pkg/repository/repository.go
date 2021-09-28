@@ -24,8 +24,6 @@ import (
 
 	"github.com/Kaiser925/gogit/internal/pkg/bytesutil"
 
-	"github.com/Kaiser925/gogit/internal/pkg/object"
-
 	"github.com/Kaiser925/gogit/internal/pkg/file"
 
 	"gopkg.in/ini.v1"
@@ -60,32 +58,28 @@ func New(p string) (*repository, error) {
 	return &r, nil
 }
 
-// WriteObject writes object to repository object database
-func (r *repository) WriteObject(obj object.Object) error {
-	data, err := object.Marshal(obj)
+// Write implements io.Writer.
+// Write writes the GitObject binary data to file system.
+func (r *repository) Write(p []byte) (int, error) {
+	sha, err := bytesutil.HexSha1(p)
 	if err != nil {
-		return err
-	}
-
-	sha, err := bytesutil.HexSha1(data)
-	if err != nil {
-		return err
+		return 0, err
 	}
 	if err := file.MkdirOr(r.gitDir, sha[:2]); err != nil {
-		return err
+		return 0, err
 	}
 
 	f, err := os.Create(filepath.Join(r.gitDir, sha[:2], sha[2:]))
 	if err != nil {
-		return err
+		return 0, err
 	}
 	defer f.Close()
 
-	if _, err := f.Write(data); err != nil {
-		return err
+	n, err := f.Write(p)
+	if err != nil {
+		return 0, err
 	}
-
-	return nil
+	return n, nil
 }
 
 // Init inits a new git repository.

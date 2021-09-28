@@ -17,9 +17,9 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/Kaiser925/gogit/internal/pkg/output"
+	"io"
 	"os"
-
-	"github.com/Kaiser925/gogit/internal/pkg/bytesutil"
 
 	"github.com/Kaiser925/gogit/internal/pkg/object"
 
@@ -51,36 +51,34 @@ func run(_ *cobra.Command, args []string) {
 		return
 	}
 
-	obj, err := object.FromFile(args[0], objType)
+	obj, err := object.Convert(args[0], objType)
 	if err != nil {
 		fmt.Println(err.Error())
 		os.Exit(1)
 	}
 
-	if !needWrite {
-		p, err := obj.MarshalBinary()
+	p, err := obj.MarshalBinary()
+	if err != nil {
+		fmt.Println(err.Error())
+		os.Exit(1)
+	}
+
+	var w io.Writer
+	if needWrite {
+		repo, err := repository.New(".")
 		if err != nil {
 			fmt.Println(err.Error())
 			os.Exit(1)
 		}
-		sha, err := bytesutil.HexSha1(p)
-		if err != nil {
-			fmt.Println(err.Error())
-			os.Exit(1)
-		}
-		fmt.Println(sha)
-		return
+		w = repo
+	} else {
+		w = &output.HashWriter{}
 	}
 
-	repo, err := repository.New(".")
+	_, err = w.Write(p)
 	if err != nil {
 		fmt.Println(err.Error())
 		os.Exit(1)
 	}
-
-	err = repo.WriteObject(obj)
-	if err != nil {
-		fmt.Println(err.Error())
-		os.Exit(1)
-	}
+	return
 }

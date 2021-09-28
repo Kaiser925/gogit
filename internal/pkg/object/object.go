@@ -17,18 +17,11 @@ package object
 
 import (
 	"bytes"
-	"compress/zlib"
 	"encoding"
 	"errors"
 	"io"
-	"io/ioutil"
 	"os"
 	"strconv"
-
-	"github.com/Kaiser925/gogit/internal/pkg/object/blob"
-	"github.com/Kaiser925/gogit/internal/pkg/object/commit"
-	"github.com/Kaiser925/gogit/internal/pkg/object/tag"
-	"github.com/Kaiser925/gogit/internal/pkg/object/tree"
 )
 
 const (
@@ -36,97 +29,69 @@ const (
 	nul   = 0x00
 )
 
-// Object is a git object
-type Object interface {
+// GitObject is the interface that wraps the basic object method.
+type GitObject interface {
 	Format() []byte
 	encoding.BinaryMarshaler
 	encoding.BinaryUnmarshaler
 }
 
-func New(t string, p []byte) (Object, error) {
+func New(t string, p []byte) (GitObject, error) {
 	var obj interface{}
 	var err error
 	switch t {
 	case "blob":
-		obj, err = blob.New(p)
+		obj, err = NewBlob(p)
 	case "commit":
-		obj, err = commit.New(p)
+		obj, err = NewCommit(p)
 	case "tree":
-		obj, err = tree.New(p)
+		obj, err = NewTree(p)
 	case "tag":
-		obj, err = tag.New(p)
+		obj, err = NewTag(p)
 	default:
 		err = errors.New("not valid object type: " + t)
 	}
 	if err != nil {
 		return nil, err
 	}
-	return obj.(Object), nil
+	return obj.(GitObject), nil
 }
 
-// Unmarshal reads data from reader of object database, parses data to Object.
-func Unmarshal(r io.Reader) (Object, error) {
-	rc, err := zlib.NewReader(r)
-	if err != nil {
-		return nil, err
-	}
-	defer rc.Close()
-	p, err := ioutil.ReadAll(rc)
-	if err != nil {
-		return nil, err
-	}
-
+// RemoveHeader remove the header from data, return the format, data and error.
+func RemoveHeader(p []byte) ([]byte, []byte, error) {
 	x := bytes.Index(p, []byte{space})
-	t := string(p[0:x])
+	f := p[0:x]
 
 	data := p[x+1:]
+	// get format
 	y := bytes.Index(data, []byte{nul})
 
 	size, err := strconv.Atoi(string(data[0:y]))
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	if size != len(data)-y-1 {
-		return nil, errors.New("bad length for sha")
+		return nil, nil, errors.New("bad length for sha")
 	}
 
-	obj, err := New(t, data[y:])
-	if err != nil {
-		return nil, err
-	}
-	return obj, nil
+	return f, data[y+1:], nil
 }
 
-// Load loads Object from object file.
-func Load(name string) (Object, error) {
-	f, err := os.Open(name)
-	if err != nil {
-		return nil, err
-	}
-	defer f.Close()
-	return Unmarshal(f)
-}
-
-// Marshal encodes Object to bytes.
-func Marshal(obj Object) ([]byte, error) {
-	p, err := obj.MarshalBinary()
-	if err != nil {
-		return nil, err
-	}
+// AddHeader inserts the header to object data.
+func AddHeader(format []byte, p []byte) []byte {
 	buf := bytes.NewBuffer([]byte{})
-
 	size := strconv.Itoa(len(p))
-	buf.Write(obj.Format())
+	buf.Write(format)
 	buf.Write([]byte{space})
 	buf.Write([]byte(size))
 	buf.Write([]byte{nul})
 	buf.Write(p)
-	return buf.Bytes(), nil
+	return buf.Bytes()
 }
 
-// FromFile computes file, returns the object.
-func FromFile(name string, t string) (Object, error) {
+// Convert converts the file to GitObject.
+func Convert(name string, t string) (GitObject, error) {
 	f, err := os.Open(name)
 	if err != nil {
 		return nil, err

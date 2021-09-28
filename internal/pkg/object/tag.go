@@ -1,6 +1,6 @@
 /*
- * Developed by Kaiser925 on 2021/8/31.
- * Lasted modified 2021/8/4.
+ * Developed by Kaiser925 on 2021/9/28.
+ * Lasted modified 2021/8/31.
  * Copyright (c) 2021.  All rights reserved
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,31 +13,30 @@
  * limitations under the License.
  */
 
-package blob
+package object
 
-// Blob represents a git blob
-type Blob struct {
+type Tag struct {
 	p []byte
 }
 
-func New(p []byte) (*Blob, error) {
-	blob := &Blob{}
-	err := blob.UnmarshalBinary(p)
+func NewTag(p []byte) (*Tag, error) {
+	c := &Tag{}
+	err := c.UnmarshalBinary(p)
 	if err != nil {
 		return nil, err
 	}
-	return blob, nil
+
+	return c, nil
 }
 
-func (b *Blob) Format() []byte {
-	return []byte("blob")
+func (c *Tag) Format() []byte {
+	return []byte("tag")
 }
 
-func (b *Blob) MarshalBinary() ([]byte, error) {
-	return b.p, nil
+func (c *Tag) MarshalBinary() ([]byte, error) {
+	panic("implement me")
 }
 
-func (b *Blob) UnmarshalBinary(p []byte) error {
-	b.p = p
-	return nil
+func (c *Tag) UnmarshalBinary(bytes []byte) error {
+	panic("implement me")
 }

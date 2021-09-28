@@ -1,6 +1,6 @@
 /*
- * Developed by Kaiser925 on 2021/8/31.
- * Lasted modified 2021/8/4.
+ * Developed by Kaiser925 on 2021/9/28.
+ * Lasted modified 2021/8/31.
  * Copyright (c) 2021.  All rights reserved
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,29 +13,35 @@
  * limitations under the License.
  */
 
-package commit
+package object
 
-type Commit struct {
+// Blob represents a git blob
+type Blob struct {
 	p []byte
 }
 
-func New(p []byte) (*Commit, error) {
-	c := &Commit{}
-	err := c.UnmarshalBinary(p)
+func NewBlob(p []byte) (*Blob, error) {
+	blob := &Blob{}
+	err := blob.UnmarshalBinary(p)
 	if err != nil {
 		return nil, err
 	}
-	return c, nil
+	return blob, nil
 }
 
-func (c *Commit) Format() []byte {
-	return []byte("commit")
+func (b *Blob) Format() []byte {
+	return []byte("blob")
 }
 
-func (c *Commit) MarshalBinary() ([]byte, error) {
-	panic("implement me")
+func (b *Blob) MarshalBinary() ([]byte, error) {
+	return AddHeader(b.Format(), b.p), nil
 }
 
-func (c *Commit) UnmarshalBinary(bytes []byte) error {
-	panic("implement me")
+func (b *Blob) UnmarshalBinary(p []byte) error {
+	_, p, err := RemoveHeader(p)
+	if err != nil {
+		return err
+	}
+	b.p = p
+	return nil
 }

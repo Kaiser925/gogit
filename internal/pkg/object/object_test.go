@@ -1,6 +1,6 @@
 /*
- * Developed by Kaiser925 on 2021/9/1.
- * Lasted modified 2021/9/1.
+ * Developed by Kaiser925 on 2021/9/28.
+ * Lasted modified 2021/9/28.
  * Copyright (c) 2021.  All rights reserved
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,27 +13,26 @@
  * limitations under the License.
  */
 
-package output
+package object
 
 import (
-	"fmt"
-	"github.com/Kaiser925/gogit/internal/pkg/bytesutil"
-	"os"
+	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
-// Fatal writes data to standard output.
-func Fatal(a ...interface{}) {
-	fmt.Println(a...)
-	os.Exit(1)
+func TestAddHeader(t *testing.T) {
+	p := []byte("hello git")
+	f := []byte("blob")
+
+	get := AddHeader(f, p)
+	want := []byte("blob 9" + string(rune(nul)) + "hello git")
+	assert.Equal(t, want, get)
 }
 
-// HashWriter prints the hash of data.
-type HashWriter struct{}
-
-func (h *HashWriter) Write(p []byte) (n int, err error) {
-	sha, err := bytesutil.HexSha1(p)
-	if err != nil {
-		return 0, err
-	}
-	return os.Stdout.Write([]byte(sha))
+func TestRemoveHeader(t *testing.T) {
+	p := []byte("blob 9" + string(rune(nul)) + "hello git")
+	f, b, err := RemoveHeader(p)
+	assert.Nil(t, err)
+	assert.Equal(t, []byte("blob"), f)
+	assert.Equal(t, []byte("hello git"), b)
 }
