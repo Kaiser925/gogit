@@ -60,7 +60,7 @@ func New(p string) (*repository, error) {
 
 // Write implements io.Writer.
 // Write writes the GitObject binary data to file system.
-func (r *repository) Write(p []byte) (int, error) {
+func (r *repository) Write(p []byte) (n int, err error) {
 	sha, err := bytesutil.HexSha1(p)
 	if err != nil {
 		return 0, err
@@ -75,11 +75,15 @@ func (r *repository) Write(p []byte) (int, error) {
 	}
 	defer f.Close()
 
-	n, err := f.Write(p)
+	d, err := bytesutil.ZlibCompress(p)
 	if err != nil {
-		return 0, err
+		return
 	}
-	return n, nil
+	n, err = f.Write(d)
+	if err != nil {
+		return
+	}
+	return
 }
 
 // Init inits a new git repository.
