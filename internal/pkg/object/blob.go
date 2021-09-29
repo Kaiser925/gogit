@@ -29,11 +29,11 @@ func (b *Blob) Format() []byte {
 }
 
 func (b *Blob) MarshalBinary() ([]byte, error) {
-	return AddHeader(b.Format(), b.p), nil
+	return addHeader(b.Format(), b.p), nil
 }
 
 func (b *Blob) UnmarshalBinary(p []byte) error {
-	_, p, err := RemoveHeader(p)
+	_, p, err := removeHeader(p)
 	if err != nil {
 		return err
 	}

@@ -58,8 +58,8 @@ func New(t string, p []byte) (GitObject, error) {
 	return obj.(GitObject), nil
 }
 
-// RemoveHeader remove the header from data, return the format, data and error.
-func RemoveHeader(p []byte) ([]byte, []byte, error) {
+// removeHeader remove the header from data, return the format, data and error.
+func removeHeader(p []byte) ([]byte, []byte, error) {
 	x := bytes.Index(p, []byte{space})
 	f := p[0:x]
 
@@ -79,8 +79,8 @@ func RemoveHeader(p []byte) ([]byte, []byte, error) {
 	return f, data[y+1:], nil
 }
 
-// AddHeader inserts the header to object data.
-func AddHeader(format []byte, p []byte) []byte {
+// addHeader inserts the header to object data.
+func addHeader(format []byte, p []byte) []byte {
 	buf := bytes.NewBuffer([]byte{})
 	size := strconv.Itoa(len(p))
 	buf.Write(format)

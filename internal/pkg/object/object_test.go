@@ -25,14 +25,14 @@ func TestAddHeader(t *testing.T) {
 	p := []byte("hello git")
 	f := []byte("blob")
 
-	get := AddHeader(f, p)
+	get := addHeader(f, p)
 	want := []byte("blob 9" + string(rune(nul)) + "hello git")
 	assert.Equal(t, want, get)
 }
 
 func TestRemoveHeader(t *testing.T) {
 	p := []byte("blob 9" + string(rune(nul)) + "hello git")
-	f, b, err := RemoveHeader(p)
+	f, b, err := removeHeader(p)
 	assert.Nil(t, err)
 	assert.Equal(t, []byte("blob"), f)
 	assert.Equal(t, []byte("hello git"), b)
