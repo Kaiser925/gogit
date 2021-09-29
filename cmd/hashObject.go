@@ -16,15 +16,10 @@
 package cmd
 
 import (
-	"fmt"
-	"io"
-	"os"
-
-	"github.com/Kaiser925/gogit/internal/pkg/output"
-
 	"github.com/Kaiser925/gogit/internal/pkg/object"
-
+	"github.com/Kaiser925/gogit/internal/pkg/output"
 	"github.com/Kaiser925/gogit/internal/pkg/repository"
+
 	"github.com/spf13/cobra"
 )
 
@@ -54,32 +49,28 @@ func run(_ *cobra.Command, args []string) {
 
 	obj, err := object.Convert(args[0], objType)
 	if err != nil {
-		fmt.Println(err.Error())
-		os.Exit(1)
+		output.Fatal(err.Error())
 	}
 
 	p, err := obj.MarshalBinary()
 	if err != nil {
-		fmt.Println(err.Error())
-		os.Exit(1)
+		output.Fatal(err.Error())
 	}
 
-	var w io.Writer
 	if needWrite {
 		repo, err := repository.New(".")
 		if err != nil {
-			fmt.Println(err.Error())
-			os.Exit(1)
+			output.Fatal(err.Error())
 		}
-		w = repo
-	} else {
-		w = &output.HashWriter{}
+		_, err = repo.Write(p)
+		if err != nil {
+			output.Fatal(err.Error())
+		}
 	}
 
-	_, err = w.Write(p)
+	_, err = output.NewHashWriter().Write(p)
 	if err != nil {
-		fmt.Println(err.Error())
-		os.Exit(1)
+		output.Fatal(err.Error())
 	}
 	return
 }

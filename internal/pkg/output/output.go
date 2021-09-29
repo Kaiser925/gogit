@@ -31,6 +31,10 @@ func Fatal(a ...interface{}) {
 // HashWriter prints the hash of data.
 type HashWriter struct{}
 
+func NewHashWriter() *HashWriter {
+	return &HashWriter{}
+}
+
 func (h *HashWriter) Write(p []byte) (n int, err error) {
 	sha, err := bytesutil.HexSha1(p)
 	if err != nil {

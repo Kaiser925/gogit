@@ -21,12 +21,7 @@ type Blob struct {
 }
 
 func NewBlob(p []byte) (*Blob, error) {
-	blob := &Blob{}
-	err := blob.UnmarshalBinary(p)
-	if err != nil {
-		return nil, err
-	}
-	return blob, nil
+	return &Blob{p: p}, nil
 }
 
 func (b *Blob) Format() []byte {

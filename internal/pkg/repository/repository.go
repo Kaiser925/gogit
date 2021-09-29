@@ -65,7 +65,7 @@ func (r *repository) Write(p []byte) (n int, err error) {
 	if err != nil {
 		return 0, err
 	}
-	if err := file.MkdirOr(r.gitDir, sha[:2]); err != nil {
+	if err := file.MkdirOr(r.gitDir, "objects", sha[:2]); err != nil {
 		return 0, err
 	}
 
@@ -84,6 +84,15 @@ func (r *repository) Write(p []byte) (n int, err error) {
 		return
 	}
 	return
+}
+
+// Open opens the sha file from git file system.
+func (r *repository) Open(sha string) ([]byte, error) {
+	p, err := os.ReadFile(path.Join(r.gitDir, sha[0:2], sha[2:]))
+	if err != nil {
+		return nil, err
+	}
+	return p, nil
 }
 
 // Init inits a new git repository.
