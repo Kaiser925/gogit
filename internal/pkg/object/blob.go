@@ -40,3 +40,7 @@ func (b *Blob) UnmarshalBinary(p []byte) error {
 	b.p = p
 	return nil
 }
+
+func (b *Blob) String() string {
+	return string(b.p)
+}

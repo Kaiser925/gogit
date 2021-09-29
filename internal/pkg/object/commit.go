@@ -39,3 +39,7 @@ func (c *Commit) MarshalBinary() ([]byte, error) {
 func (c *Commit) UnmarshalBinary(bytes []byte) error {
 	panic("implement me")
 }
+
+func (c *Commit) String() string {
+	panic("implement me")
+}

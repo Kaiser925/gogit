@@ -32,6 +32,7 @@ const (
 // GitObject is the interface that wraps the basic object method.
 type GitObject interface {
 	Format() []byte
+	String() string
 	encoding.BinaryMarshaler
 	encoding.BinaryUnmarshaler
 }
@@ -108,4 +109,21 @@ func Convert(name string, t string) (GitObject, error) {
 		return nil, err
 	}
 	return obj, nil
+}
+
+// Parse parses the binary data to specify GitObject.
+func Parse(t string, p []byte) (GitObject, error) {
+	var o GitObject
+	switch t {
+	case "blob":
+		o = &Blob{}
+	default:
+		return nil, errors.New("not valid object type: " + t)
+	}
+
+	err := o.UnmarshalBinary(p)
+	if err != nil {
+		return nil, err
+	}
+	return o, nil
 }

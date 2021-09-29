@@ -92,6 +92,10 @@ func (r *repository) Open(sha string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+	p, err = bytesutil.ZlibDecompress(p)
+	if err != nil {
+		return nil, err
+	}
 	return p, nil
 }
 

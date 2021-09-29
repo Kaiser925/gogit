@@ -39,3 +39,7 @@ func (c *Tree) MarshalBinary() ([]byte, error) {
 func (c *Tree) UnmarshalBinary(bytes []byte) error {
 	panic("implement me")
 }
+
+func (c *Tree) String() string {
+	panic("implement me")
+}

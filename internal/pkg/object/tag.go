@@ -40,3 +40,7 @@ func (c *Tag) MarshalBinary() ([]byte, error) {
 func (c *Tag) UnmarshalBinary(bytes []byte) error {
 	panic("implement me")
 }
+
+func (c *Tag) String() string {
+	panic("implement me")
+}
