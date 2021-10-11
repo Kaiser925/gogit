@@ -17,45 +17,60 @@ package repository
 
 import (
 	"errors"
-	"fmt"
+	"io/fs"
 	"os"
 	"path"
 	"path/filepath"
 
-	"github.com/Kaiser925/gogit/internal/pkg/bytesutil"
+	"github.com/Kaiser925/gogit/internal/pkg/wfs"
 
-	"github.com/Kaiser925/gogit/internal/pkg/file"
+	"github.com/Kaiser925/gogit/internal/pkg/bytesutil"
 
 	"gopkg.in/ini.v1"
 )
 
-type repository struct {
-	workTree string
-	gitDir   string
+var ErrNotDir = errors.New("not a dir")
 
+type repository struct {
 	conf *ini.File
+
+	fsys  fs.FS
+	fsysw wfs.DirWriteFS
+}
+
+func NewWithFS(fsys fs.FS, fsysw wfs.DirWriteFS) (*repository, error) {
+	f, err := fsys.Open(".")
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+	info, err := f.Stat()
+	if err != nil {
+		return nil, err
+	}
+	if !info.IsDir() {
+		return nil, ErrNotDir
+	}
+	b, err := fs.ReadFile(fsys, "config")
+	if err != nil {
+		return nil, err
+	}
+	conf, err := ini.Load(b)
+	if err != nil {
+		return nil, err
+	}
+	return &repository{
+		fsys:  fsys,
+		fsysw: fsysw,
+		conf:  conf,
+	}, nil
 }
 
 // New returns a repository instance.
 func New(p string) (*repository, error) {
-	var r repository
-	r.workTree = p
-	r.gitDir = path.Join(p, ".git")
-
-	f, err := os.Stat(r.gitDir)
-	if err != nil {
-		return nil, fmt.Errorf("construct repository error: %w", err)
-	}
-	if !f.IsDir() {
-		return nil, errors.New(fmt.Sprintf("%s is not a git repository", r.gitDir))
-	}
-
-	conf, err := ini.Load(path.Join(r.gitDir, "config"))
-	if err != nil {
-		return nil, err
-	}
-	r.conf = conf
-	return &r, nil
+	f := os.DirFS(p + "/.git")
+	wf := wfs.WFS(p + "/.git")
+	return NewWithFS(f, wf)
 }
 
 // Write implements io.Writer.
@@ -65,11 +80,16 @@ func (r *repository) Write(p []byte) (n int, err error) {
 	if err != nil {
 		return 0, err
 	}
-	if err := file.MkdirOr(r.gitDir, "objects", sha[:2]); err != nil {
-		return 0, err
+
+	name := "objects/" + sha[:2]
+	if _, err := fs.Stat(r.fsys, name); err != nil {
+		err = r.fsysw.Mkdir(name, os.ModePerm)
+		if err != nil {
+			return 0, err
+		}
 	}
 
-	f, err := os.Create(filepath.Join(r.gitDir, sha[:2], sha[2:]))
+	f, err := wfs.Create(r.fsysw, filepath.Join("objects", sha[:2], sha[2:]))
 	if err != nil {
 		return 0, err
 	}
@@ -88,7 +108,7 @@ func (r *repository) Write(p []byte) (n int, err error) {
 
 // Open opens the sha file from git file system.
 func (r *repository) Open(sha string) ([]byte, error) {
-	p, err := os.ReadFile(path.Join(r.gitDir, sha[0:2], sha[2:]))
+	p, err := fs.ReadFile(r.fsys, path.Join("objects", sha[0:2], sha[2:]))
 	if err != nil {
 		return nil, err
 	}
@@ -101,36 +121,42 @@ func (r *repository) Open(sha string) ([]byte, error) {
 
 // Init inits a new git repository.
 func Init(p string) (*repository, error) {
-	var r repository
-	r.workTree = p
-	r.gitDir = path.Join(p, ".git")
+	return InitWithFs(os.DirFS(p+"/.git"), wfs.WFS(p+"/.git"))
+}
+
+func InitWithFs(fsys fs.FS, fsysw wfs.DirWriteFS) (*repository, error) {
+	r := &repository{
+		fsys:  fsys,
+		fsysw: fsysw,
+	}
+
 	dirs := []string{"branches", "objects", "refs/tags", "refs/heads"}
 	for _, d := range dirs {
-		err := file.MkdirOr(r.gitDir, d)
-		if err != nil {
-			return nil, err
+		if _, err := fs.Stat(r.fsys, d); err != nil {
+			if err := r.fsysw.Mkdir(d, os.ModePerm); err != nil {
+				return nil, err
+			}
 		}
 	}
 
 	desc := []byte("Unnamed repository; edit this file 'description' to name the repository.\n")
-	err := file.WriteTo(path.Join(r.gitDir, "description"), desc)
+	_, err := wfs.WriteFile(r.fsysw, "description", desc)
 	if err != nil {
 		return nil, err
 	}
 
 	ref := []byte("ref: refs/heads/master\n")
-	err = file.WriteTo(path.Join(r.gitDir, "HEAD"), ref)
+	_, err = wfs.WriteFile(r.fsysw, "HEAD", ref)
 	if err != nil {
 		return nil, err
 	}
 
-	confName := path.Join(r.gitDir, "config")
-	err = file.WriteTo(confName, defaultConf())
+	_, err = wfs.WriteFile(r.fsysw, "config", ref)
 	if err != nil {
 		return nil, err
 	}
 
-	conf, err := ini.Load(confName)
+	conf, err := ini.Load(defaultConf())
 	if err != nil {
 		return nil, err
 	}
@@ -138,7 +164,7 @@ func Init(p string) (*repository, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &r, nil
+	return r, nil
 }
 
 func defaultConf() []byte {

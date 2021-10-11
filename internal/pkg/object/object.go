@@ -32,6 +32,8 @@ const (
 // GitObject is the interface that wraps the basic object method.
 type GitObject interface {
 	Format() []byte
+
+	// String returns string of GitObject content.
 	String() string
 	encoding.BinaryMarshaler
 	encoding.BinaryUnmarshaler
