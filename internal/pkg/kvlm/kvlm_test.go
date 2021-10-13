@@ -22,14 +22,14 @@ import (
 
 var parseTests = []struct {
 	raw  []byte
-	want KVListMap
+	want map[string][]string
 }{
 	{
 		raw: []byte(`tree tree
 
 Body
 `),
-		want: KVListMap{
+		want: map[string][]string{
 			"tree": []string{"tree"},
 			Body:   []string{"Body\n"},
 		},
@@ -38,14 +38,14 @@ Body
 		raw: []byte(`tree tree
 
 Body`),
-		want: KVListMap{
+		want: map[string][]string{
 			"tree": []string{"tree"},
 			Body:   []string{"Body"},
 		},
 	},
 	{
 		raw: []byte(`tree tree`),
-		want: KVListMap{
+		want: map[string][]string{
 			"tree": []string{"tree"},
 		},
 	},
@@ -61,7 +61,7 @@ Bodyline2
 
 Bodyline3
 `),
-		want: KVListMap{
+		want: map[string][]string{
 			"header1": []string{"header1"},
 			"header2": []string{"header2line1\n\n header2line2\n header2line3\n"},
 			Body:      []string{"Bodyline1\nBodyline2\n\nBodyline3\n"},
@@ -71,6 +71,6 @@ Bodyline3
 
 func TestParse(t *testing.T) {
 	for _, tt := range parseTests {
-		assert.Equal(t, tt.want, Parse(tt.raw))
+		assert.Equal(t, tt.want, Parse(tt.raw).kvs)
 	}
 }

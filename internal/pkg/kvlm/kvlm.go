@@ -19,16 +19,49 @@ package kvlm
 import (
 	"bufio"
 	"bytes"
+	"container/list"
 	"strings"
 )
 
-type KVListMap map[string][]string
-
 const Body = " "
 
+type KVListMap struct {
+	kvs  map[string][]string
+	keys *list.List
+}
+
+func NewKVListMap() *KVListMap {
+	return &KVListMap{
+		kvs:  make(map[string][]string, 16),
+		keys: list.New(),
+	}
+}
+
+func (k *KVListMap) Add(key, value string) {
+	if val, ok := k.kvs[key]; ok {
+		k.kvs[key] = append(val, value)
+		return
+	}
+
+	k.kvs[key] = []string{value}
+	k.keys.PushBack(key)
+}
+
+func (k *KVListMap) Set(key string, value []string) {
+	if _, ok := k.kvs[key]; !ok {
+		k.keys.PushBack(key)
+	}
+	k.kvs[key] = value
+}
+
+func (k *KVListMap) Get(key string) ([]string, bool) {
+	val, ok := k.kvs[key]
+	return val, ok
+}
+
 // Parse parses the raw data to KVListMap
-func Parse(raw []byte) KVListMap {
-	listMap := make(KVListMap)
+func Parse(raw []byte) *KVListMap {
+	listMap := NewKVListMap()
 
 	var endString string
 	last := len(raw) - 1
@@ -56,7 +89,9 @@ func Parse(raw []byte) KVListMap {
 			}
 
 			if strings.Index(lines[i+1], " ") == 0 {
-				listMap[prevKey][0] = listMap[prevKey][0] + "\n\n"
+				val, _ := listMap.Get(prevKey)
+				val[0] = val[0] + "\n\n"
+				listMap.Set(prevKey, val)
 				continue
 			}
 
@@ -68,7 +103,7 @@ func Parse(raw []byte) KVListMap {
 		space := strings.Index(line, " ")
 		// line start with " " means it is part of multiple lines value.
 		if space == 0 {
-			strs := listMap[prevKey]
+			strs, _ := listMap.Get(prevKey)
 			last := len(strs) - 1
 			strs[last] = strs[last] + line + "\n"
 			continue
@@ -77,19 +112,18 @@ func Parse(raw []byte) KVListMap {
 		// load headers.
 		if space > 0 {
 			key := line[:space]
-			_, ok := listMap[key]
+			_, ok := listMap.Get(key)
 			if ok {
-				listMap[key] = append(listMap[key], line)
+				listMap.Add(key, line)
 			} else {
-				listMap[key] = []string{line[space+1:]}
+				listMap.Set(key, []string{line[space+1:]})
 			}
 			prevKey = key
 		}
 	}
 
 	if bodyIndex > 0 {
-		listMap[Body] = []string{strings.Join(lines[bodyIndex:], "\n")}
-		listMap[Body][0] = listMap[Body][0] + endString
+		listMap.Set(Body, []string{strings.Join(lines[bodyIndex:], "\n") + endString})
 	}
 
 	return listMap
